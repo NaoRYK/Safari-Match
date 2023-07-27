@@ -26,11 +26,14 @@ public class Piece : MonoBehaviour
 
     public type pieceType;
     // Start is called before the first frame update
-    public void Setup( int x_, int y_ , Board board_)
+    public void Setup(int x_, int y_, Board board_)
     {
         y = y_;
-        x = x_; 
-        board = board_; 
+        x = x_;
+        board = board_;
+
+        transform.localScale = Vector3.one * 0.35f;
+        transform.DOScale(Vector3.one, 0.35f);
     }
 
 
@@ -43,6 +46,25 @@ public class Piece : MonoBehaviour
         };
 
 
+    }
+
+    public void Remove(bool animated)
+    {
+        if (animated)
+        {
+            transform.DORotate(new Vector3(0, 0, -120f), 0.12f);
+            transform.DOScale(Vector3.one * 1.2f, 0.085f).onComplete = () =>
+            {
+                transform.DOScale(Vector3.zero, 0.1f).onComplete = () =>
+                {
+                    Destroy(gameObject);
+                };
+            };
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
 

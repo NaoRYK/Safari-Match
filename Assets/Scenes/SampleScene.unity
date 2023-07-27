@@ -152,8 +152,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9dd63b81ea505b042be4d01954604df2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  height: 12
+  timeBetweenPieces: 0.018
   width: 6
+  height: 12
   tileObject: {fileID: 2402083500881079532, guid: 1b103a70041ee4742ace48efb18c631a, type: 3}
   cameraSizeOffset: 0.1
   cameraVerticalOffset: 0
@@ -264,7 +265,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.66042185, g: 0.7594611, b: 0.9150943, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
