@@ -14,6 +14,8 @@ public class Board : MonoBehaviour
     public float cameraSizeOffset;
     public float cameraVerticalOffset;
 
+    public int PointsPerMatch;
+
     public GameObject[] availablePieces;
 
     Tile[,] Tiles;
@@ -35,7 +37,36 @@ public class Board : MonoBehaviour
 
         SetupBoard();
         PositionCamera();
-        StartCoroutine(SetupPieces());
+        
+
+        if(GameManager.Instance.gameState == GameManager.GameState.InGame) {
+            StartCoroutine(SetupPieces());
+        }
+        GameManager.Instance.OnGameStateUpdate.AddListener(OnGameStateUpdated);
+    }
+
+    private void OnGameStateUpdated(GameManager.GameState newState)
+    {
+        if(newState == GameManager.GameState.InGame)
+        {
+            StartCoroutine(SetupPieces());
+
+        }
+        if(newState == GameManager.GameState.GameOver)
+        {
+            ClearAllPieces();
+        }
+    }
+
+    private void ClearAllPieces()
+    {
+        for(int x =0; x <width; x++)
+        {
+            for(int y =0;y < height; y++)
+            {
+                ClearPieceAt(x, y);
+            }
+        }
     }
 
     private IEnumerator SetupPieces()
@@ -65,6 +96,7 @@ public class Board : MonoBehaviour
                
             }
         }
+        GameManager.Instance.gameState = GameManager.GameState.InGame;
         yield return null;
     }
 
@@ -113,11 +145,10 @@ public class Board : MonoBehaviour
             }
         }
     }
-
-    public void TileDown(Tile tile_)
+public void TileDown(Tile tile_)
     {
 
-        if (!swappingPieces)
+        if (!swappingPieces && GameManager.Instance.gameState == GameManager.GameState.InGame)
         {
             startTile = tile_;
 
@@ -127,7 +158,7 @@ public class Board : MonoBehaviour
 
     public void TileOver(Tile tile_)
     {
-        if (!swappingPieces)
+        if (!swappingPieces && GameManager.Instance.gameState == GameManager.GameState.InGame)
         {
             endTile = tile_;
         }
@@ -138,7 +169,7 @@ public class Board : MonoBehaviour
 
     {
 
-        if (!swappingPieces)
+        if (!swappingPieces && GameManager.Instance.gameState == GameManager.GameState.InGame)
         {
             if (startTile != null && endTile != null && IsCloseTo(startTile, endTile))
             {
@@ -147,6 +178,7 @@ public class Board : MonoBehaviour
         }
 
     }
+    
 
     IEnumerator SwapTiles()
     {
@@ -154,6 +186,7 @@ public class Board : MonoBehaviour
         var StarPiece = Pieces[startTile.x, startTile.y];
         var EndPiece = Pieces[endTile.x, endTile.y];
 
+        AudioManager.Instance.Move();
         StarPiece.Move(endTile.x, endTile.y);
         EndPiece.Move(startTile.x, startTile.y);
 
@@ -171,6 +204,7 @@ public class Board : MonoBehaviour
 
         if (allMatches.Count == 0)
         {
+            AudioManager.Instance.Miss();
             StarPiece.Move(startTile.x, startTile.y);
             EndPiece.Move(endTile.x, endTile.y);
             Pieces[startTile.x, startTile.y] = StarPiece;
@@ -179,6 +213,7 @@ public class Board : MonoBehaviour
         else
         {
             ClearPieces(allMatches);
+            AwardPoints(allMatches);
         }
 
         startTile = null;
@@ -219,6 +254,8 @@ public class Board : MonoBehaviour
             {
                 newMatches = newMatches.Union(matches).ToList();
                 ClearPieces(matches);
+                AwardPoints(matches);
+
             }
 
         });
@@ -372,5 +409,11 @@ public class Board : MonoBehaviour
         }
 
         return foundMatches;
+    }
+
+
+    public void AwardPoints(List<Piece> allMatches)
+    {
+        GameManager.Instance.AddPoints(allMatches.Count * PointsPerMatch);
     }
 }
